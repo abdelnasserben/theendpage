@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('message');
             $table->string('gif')->nullable();
             $table->string('sound')->nullable();
+            $table->string('author_name')->nullable();
+            $table->string('author_email')->nullable();
             $table->boolean('anonymous')->default(false);
             $table->timestamp('release_at')->nullable();
             $table->timestamps();

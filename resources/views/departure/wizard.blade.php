@@ -1,6 +1,16 @@
 @extends('layouts.app')
+@push('styles')
+<link href="/css/app.css" rel="stylesheet">
+@endpush
 @section('content')
 <div class="container py-5 position-relative" style="min-height:500px;">
+  <div class="d-flex justify-content-end mb-3">
+    <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="themeToggle">
+          <label class="form-check-label ms-2" for="themeToggle">Sombre</label>
+    </div>
+  </div>
+
   <h1 class="mb-4 text-center">Créer ma page de départ</h1>
 
   <!-- Progress bar -->

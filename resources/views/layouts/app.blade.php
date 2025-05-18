@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TheEnd.page</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/app.css" rel="stylesheet">
+  @stack('styles')
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
@@ -50,11 +50,6 @@
             </ul>
           </div>
         @endguest
-
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="themeToggle">
-          <label class="form-check-label ms-2" for="themeToggle">Sombre</label>
-        </div>
       </div>
     </div>
   </div>

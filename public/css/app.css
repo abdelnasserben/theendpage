@@ -62,7 +62,7 @@ body, .navbar, .card {
 }
 
 /* Progress bar */
-.progress-bar {
+.wizard-page .progress-bar {
   background-color: var(--accent) !important;
   transition: width .3s;
 }

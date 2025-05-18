@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\DeparturePage;
 use App\Models\Vote;
 use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 
@@ -14,6 +15,7 @@ class DeparturePageSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create();
+
         $tones = [
             'dramatique',
             'ironique',
@@ -25,43 +27,68 @@ class DeparturePageSeeder extends Seeder
             'honnête'
         ];
 
-        // Génère 20 pages
+        $imageUrls = [
+            'https://picsum.photos/seed/1/400/250',
+            'https://picsum.photos/seed/2/400/250',
+            'https://picsum.photos/seed/3/400/250',
+            'https://placekitten.com/400/250',
+            'https://placebear.com/400/250',
+        ];
+
+        // Créer 15 utilisateurs
+        $users = collect();
+        for ($i = 0; $i < 15; $i++) {
+            $users->push(User::create([
+                'name' => $faker->name,
+                'email' => $faker->unique()->safeEmail,
+                'password' => bcrypt('password'), // mot de passe générique
+            ]));
+        }
+
+        // Créer 20 pages
         for ($i = 0; $i < 20; $i++) {
-            $tone    = $faker->randomElement($tones);
+            $tone = $faker->randomElement($tones);
             $message = $faker->paragraphs($faker->numberBetween(1, 3), true);
-            $slug    = Str::slug(Str::limit($message, 50) . '-' . $i, '-');
+            $slug = Str::slug(Str::limit($tone . '-' . Str::random(8), 50));
+
+            $isAnonymous = $faker->boolean(30); // 30% anonymes
+            $user = $isAnonymous ? null : $users->random();
 
             $page = DeparturePage::create([
                 'tone'         => $tone,
                 'message'      => $message,
-                'gif'          => $faker->imageUrl(400, 250, 'abstract', true),
-                'sound'        => null,    // ou $faker->url
-                'anonymous'    => $faker->boolean(30),
-                'author_name'  => $faker->name,
-                'author_email' => $faker->email,
+                'gif'          => $faker->randomElement($imageUrls),
+                'sound'        => "/sounds/{$tone}.mp3",
+                'anonymous'    => $isAnonymous,
+                'author_name'  => $isAnonymous ? null : $user->name,
+                'author_email' => $isAnonymous ? null : $user->email,
                 'release_at'   => $faker->dateTimeBetween('-1 month', 'now'),
                 'slug'         => $slug,
-                'user_id'      => null,    // ou $faker->numberBetween(1,5) si vous avez déjà des users
+                'user_id'      => $user?->id,
             ]);
 
-            // Génère entre 0 et 50 votes
-            $voteCount = $faker->numberBetween(0, 50);
+            // Créer entre 3 et 10 votes
+            $voteCount = $faker->numberBetween(3, 10);
             for ($j = 0; $j < $voteCount; $j++) {
+                $voteUser = $faker->boolean(60) ? $users->random() : null; // 60% des votes avec utilisateur
+
                 Vote::create([
                     'departure_page_id' => $page->id,
-                    'voter_ip'          => $faker->ipv4,
-                    'user_id'           => null,
+                    'voter_ip' => $faker->ipv4,
+                    'user_id' => $voteUser?->id,
                 ]);
             }
 
-            // Génère entre 0 et 10 commentaires
-            $commentCount = $faker->numberBetween(0, 10);
+            // Créer entre 1 et 5 commentaires
+            $commentCount = $faker->numberBetween(1, 5);
             for ($k = 0; $k < $commentCount; $k++) {
+                $commentUser = $faker->boolean(50) ? $users->random() : null;
+
                 Comment::create([
                     'departure_page_id' => $page->id,
-                    'user_id'           => null,
-                    'author'            => $faker->name,
-                    'content'           => $faker->sentence($faker->numberBetween(5, 15)),
+                    'user_id' => $commentUser?->id,
+                    'author' => $commentUser?->name ?? $faker->name,
+                    'content' => $faker->sentence($faker->numberBetween(5, 15)),
                 ]);
             }
         }

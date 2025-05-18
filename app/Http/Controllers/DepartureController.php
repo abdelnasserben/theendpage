@@ -11,6 +11,12 @@ use Illuminate\Support\Str;
 
 class DepartureController extends Controller
 {
+    public function histories()
+    {
+        $pages = DeparturePage::latest()->paginate(9);
+        return view('departure.histories', compact('pages'));
+    }
+
     public function wizard()
     {
         return view('departure.wizard');
@@ -55,7 +61,7 @@ class DepartureController extends Controller
             'tone'          => $validated['tone'],
             'message'       => $validated['message'],
             'gif'           => $validated['gif'] ?? null,
-            'sound'         => $validated['sound'] ?? null,
+            'sound'         => $validated['sound'] ?? "/sounds/" . Str::slug($validated['tone']) . ".mp3",
             'anonymous'     => $isAnonymous,
             'author_name'   => $isAnonymous ? null : ($validated['author_name'] ?? null),
             'author_email'  => $isAnonymous ? null : ($validated['author_email'] ?? null),

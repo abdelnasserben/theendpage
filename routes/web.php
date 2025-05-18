@@ -19,6 +19,7 @@ Route::get('/page/{slug}', [DepartureController::class, 'show'])->name('departur
 Route::post('/page/{slug}/comment', [DepartureController::class, 'comment'])->name('departure.comment');
 Route::post('/page/{slug}/vote',    [DepartureController::class,'vote'])->name('departure.vote');
 Route::get('/hall-of-fame',         [DepartureController::class,'hallOfFame'])->name('departure.hallOfFame');
+Route::get('/histories',            [DepartureController::class,'histories'])->name('departure.histories');
 
 
 Route::get('register', [RegisterController::class, 'showForm'])->name('register.form');

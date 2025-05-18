@@ -17,6 +17,11 @@
 :root.dark.theme-honnête        { --bg: #0f281f; --fg: #f9fff9; --accent: #198754; }
 
 /* Global */
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+
 body, .navbar, .card {
   background-color: var(--bg) !important;
   color: var(--fg) !important;

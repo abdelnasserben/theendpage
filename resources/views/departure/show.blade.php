@@ -1,120 +1,111 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Hero Section -->
-<div class="vh-100 d-flex flex-column justify-content-center align-items-center text-center p-4"
-     style="background: var(--bg) url('/images/bg-{{ $page->tone }}.jpg') center/cover no-repeat;">
-  <div class="bg-dark bg-opacity-75 p-5 rounded-3 shadow-lg">
-    <h1 class="display-4 fw-bold text-light mb-3 animate__animated animate__fadeInDown">Le Dernier Mot</h1>
-    <h2 class="text-uppercase mb-4 text-light animate__animated animate__fadeInUp">{{ ucfirst($page->tone) }}</h2>
-    <p id="typed-final" class="lead text-light animate__animated animate__fadeIn" style="min-height:4rem;"></p>
-
-    @if(!$page->anonymous)
-      <div class="mt-4 animate__animated animate__fadeInUp">
-        @if($page->author_name)
-          <p class="text-light">— {{ $page->author_name }}</p>
-        @endif
-        @if($page->author_email)
-          <p><a href="mailto:{{ $page->author_email }}" class="text-info text-decoration-none">{{ $page->author_email }}</a></p>
-        @endif
-      </div>
-    @endif
-
-    @if($page->gif)
-      <div class="mt-4 animate__animated animate__zoomIn">
-        <img src="{{ $page->gif }}" alt="GIF" class="img-fluid rounded">
-      </div>
-    @endif
-
-    @if($page->sound)
-      <div class="mt-3 animate__animated animate__fadeIn">
-        <audio controls autoplay loop>
-          <source src="{{ $page->sound }}" type="audio/mpeg">
-          Votre navigateur ne supporte pas la balise audio.
-        </audio>
-      </div>
-    @endif
-
-    <div class="mt-4 animate__animated animate__fadeInUp">
-      <a href="{{ route('departure.show', $page->slug) }}" class="btn btn-outline-light btn-lg">Partager ce lien</a>
+  <!-- Hero Section -->
+  <div class="bg-dark text-light position-relative" 
+       style="background: url('{{ $page->gif }}') center/cover; min-height:60vh;">
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"></div>
+    <div class="container position-relative d-flex flex-column justify-content-center align-items-center text-center py-5" style="min-height:60vh;">
+      <h1 class="display-4 fw-bold mb-3">{{ Str::limit($page->message, 50, '…') }}</h1>
+      <h2 class="h5 text-secondary mb-2"><span class="text-white">{{ ucfirst($page->tone) }}</span></h2>
+      @if(!$page->anonymous && $page->author_name)
+        <p class="mb-2"><i class="fas fa-user me-2"></i>{{ $page->author_name }}</p>
+      @endif
+      <a href="#story-content" class="btn btn-outline-light btn-lg mt-3">
+        <i class="fas fa-book-open me-1"></i>Lire l’intégralité
+      </a>
     </div>
   </div>
-</div>
 
-@if(session('success'))
-  <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+  <!-- Full Story Content -->
+  <div id="story-content" class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <article class="mb-4">
+          <div class="p-4 border rounded bg-light">
+            <p class="mb-0">{{ $page->message }}</p>
+          </div>
 
-@guest
-  <div class="alert alert-info d-flex justify-content-between align-items-center">
-    <div>
-      <strong>Astuce :</strong> Connectez‑vous pour garder vos votes et commentaires dans votre profil.
-    </div>
-    <div>
-      <a href="{{ route('login.form') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-      <a href="{{ route('register.form') }}" class="btn btn-primary btn-sm">Inscription</a>
+          @if($page->sound)
+            <div class="mt-4">
+              <audio controls autoplay loop class="w-100">
+                <source src="{{ $page->sound }}" type="audio/mpeg">
+                Votre navigateur ne supporte pas l’audio.
+              </audio>
+            </div>
+          @endif
+        </article>
+      </div>
     </div>
   </div>
-@endguest
 
-<div class="mt-5 container">
-  <h3>Commentaires ({{ $page->comments->count() }})</h3>
+  <!-- Comment & Vote Section -->
+  <div class="container mb-5">
+    <div class="row gx-4 gy-5">
+      <!-- Comment Form -->
+      <div class="col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <i class="fas fa-comments me-2"></i>Laisser un commentaire
+          </div>
+          <div class="card-body">
+            <form action="{{ route('departure.comment', $page->slug) }}" method="POST">
+              @csrf
+              <div class="mb-3">
+                <label for="author" class="form-label">Nom</label>
+                <input type="text"
+                       id="author"
+                       name="author"
+                       class="form-control @error('author') is-invalid @enderror"
+                       value="{{ auth()->check() ? auth()->user()->name : old('author') }}"
+                       {{ auth()->check() ? 'readonly' : '' }}
+                       placeholder="Votre nom (optionnel)">
+                @error('author')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <div class="mb-3">
+                <label for="content" class="form-label">Commentaire</label>
+                <textarea id="content"
+                          name="content"
+                          rows="4"
+                          class="form-control @error('content') is-invalid @enderror"
+                          required>{{ old('content') }}</textarea>
+                @error('content')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-paper-plane me-1"></i>Envoyer
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
 
-  <form action="{{ route('departure.comment', $page->slug) }}" method="POST" class="mb-4">
-    @csrf
-
-    <div class="mb-3">
-      <label for="author" class="form-label">Votre nom</label>
-      <input type="text"
-             name="author"
-             id="author"
-             class="form-control"
-             value="{{ auth()->check() ? auth()->user()->name : old('author') }}"
-             {{ auth()->check() ? 'readonly' : '' }}
-             placeholder="Votre nom (optionnel)">
+      <!-- Comments List & Vote Button -->
+      <div class="col-lg-6">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">
+            <i class="fas fa-comments me-1"></i>{{ $page->comments()->count() }} Commentaire{{ $page->comments()->count()>1?'s':'' }}
+          </h5>
+          <form action="{{ route('departure.vote', $page->slug) }}" method="POST">
+            @csrf
+            <button class="btn btn-warning">
+              <i class="fas fa-thumbs-up me-1"></i>Voter ({{ $page->votes()->count() }})
+            </button>
+          </form>
+        </div>
+        <ul class="list-group">
+          @foreach($page->comments()->latest()->get() as $c)
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <strong>{{ $c->author }}</strong>
+                  <small class="text-muted ms-2">{{ $c->created_at->diffForHumans() }}</small>
+                </div>
+              </div>
+              <p class="mb-0 mt-2">{{ $c->content }}</p>
+            </li>
+          @endforeach
+        </ul>
+      </div>
     </div>
-
-    <div class="mb-3">
-      <label for="content" class="form-label">Votre commentaire</label>
-      <textarea name="content"
-                id="content"
-                class="form-control"
-                rows="3"
-                required>{{ old('content') }}</textarea>
-      @error('content')<div class="text-danger">{{ $message }}</div>@enderror
-    </div>
-
-    <button class="btn btn-primary">Envoyer</button>
-  </form>
-
-  <ul class="list-group mb-4">
-    @foreach($page->comments()->latest()->get() as $c)
-      <li class="list-group-item">
-        <strong>{{ $c->author }}</strong>
-        <small class="text-muted">— {{ $c->created_at->format('d/m/Y H:i') }}</small>
-        <p class="mb-0">{{ $c->content }}</p>
-      </li>
-    @endforeach
-  </ul>
-
-  <form action="{{ route('departure.vote', $page->slug) }}" method="POST">
-    @csrf
-    <button class="btn btn-warning">
-      👍 Voter ({{ $page->votes()->count() }})
-    </button>
-  </form>
-</div>
-
-<!-- Typed.js pour effet machine à écrire final -->
-<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    new Typed('#typed-final', {
-      strings: ["{!! addslashes($page->message) !!}"],
-      typeSpeed: 40,
-      showCursor: false,
-      startDelay: 500
-    });
-  });
-</script>
+  </div>
 @endsection

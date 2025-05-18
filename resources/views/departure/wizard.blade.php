@@ -22,8 +22,7 @@
 
   @guest
     <p class="text-muted small">
-      <a href="{{ route('login.form') }}">Connectez‑vous</a> pour suivre vos créations, commentaires et votes,<br>
-      ou restez <strong>anonyme</strong>.
+      <a href="{{ route('login.form') }}">Connectez‑vous</a> pour suivre vos créations, commentaires et votes.
     </p>
   @endguest
 
